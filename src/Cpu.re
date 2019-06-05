@@ -1,36 +1,70 @@
-type state = {cpu: option(Rawbones.Cpu.t)};
+type state = option(Rawbones.Cpu.t);
 
-type action =
-  | LoadRom(bytes)
-  | Step;
+module Display = {
+  [@react.component]
+  let make = (~cpu: Rawbones.Cpu.t) => {
+    let hex = int => Rawbones.Disassemble.to_hex(int) |> ReasonReact.string;
 
-let reducer = (state, action) => {
-  switch (action) {
-  | LoadRom(bytes) =>
-    let cpu =
-      Rawbones.Rom.parse("loaded", bytes)
-      |> Rawbones.Memory.build
-      |> Rawbones.Cpu.build;
-    {cpu: Some(cpu)};
-  | Step =>
-    switch (state.cpu) {
-    | Some(c) => Rawbones.Cpu.step(c)
-    | _ => ()
-    };
-    state;
+    <table className="table">
+      <thead>
+        <tr>
+          <th> {ReasonReact.string("PC")} </th>
+          <th> {ReasonReact.string("Acc")} </th>
+          <th> {ReasonReact.string("X")} </th>
+          <th> {ReasonReact.string("Y")} </th>
+          <th> {ReasonReact.string("Status")} </th>
+          <th> {ReasonReact.string("Stack")} </th>
+          <th> {ReasonReact.string("Cycles")} </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td> {hex(cpu.pc)} </td>
+          <td> {hex(cpu.acc)} </td>
+          <td> {hex(cpu.x)} </td>
+          <td> {hex(cpu.y)} </td>
+          <td> {hex(Rawbones.Flag.Register.to_int(cpu.status))} </td>
+          <td> {hex(cpu.stack)} </td>
+          <td> {hex(cpu.cycles)} </td>
+        </tr>
+      </tbody>
+    </table>;
   };
 };
 
 [@react.component]
 let make = () => {
-  let ({cpu}, dispatch) = React.useReducer(reducer, {cpu: None});
+  let (state, setState) = React.useState(() => None);
   let fileRef = React.useRef(Js.Nullable.null);
 
   let loadRom = rom => {
-    dispatch(LoadRom(Bytes.of_string(rom)));
+    setState(_ => {
+      let cpu =
+        Bytes.of_string(rom)
+        |> Rawbones.Rom.parse("loaded")
+        |> Rawbones.Memory.build
+        |> Rawbones.Cpu.build;
+
+      cpu.pc = 0xc000;
+
+      Some(cpu);
+    });
   };
 
-  let stepCpu = () => dispatch(Step);
+  let step = () =>
+    setState(s =>
+      switch (s) {
+      | Some(cpu) =>
+        Rawbones.Cpu.step(cpu);
+        Some(Rawbones.Cpu.copy(cpu));
+      | _ => None
+      }
+    );
+
+  let start = () => {
+    Js.Global.setInterval(step, 1);
+    ();
+  };
 
   let handleFileUpload: (string => unit) => unit = [%bs.raw
     {|
@@ -46,23 +80,10 @@ let make = () => {
   |}
   ];
 
-  let out =
-    switch (cpu) {
-    | Some((c: Rawbones.Cpu.t)) =>
-      let x = c.x;
-      let y = c.y;
-      let acc = c.acc;
-      let pc = c.pc;
-
-      let message = {j|
-x:   $x
-y:   $y
-acc: $acc
-pc:  $pc
-      |j};
-
-      <pre> {ReasonReact.string(message)} </pre>;
+  let preview =
+    switch (state) {
     | None => <span />
+    | Some(cpu) => <Display cpu />
     };
 
   <div>
@@ -71,7 +92,8 @@ pc:  $pc
       ref={ReactDOMRe.Ref.domRef(fileRef)}
       onChange={_ => handleFileUpload(loadRom)}
     />
-    out
-    <button onClick={_ => stepCpu()}> {ReasonReact.string("Step")} </button>
+    preview
+    <button onClick={_ => step()}> {ReasonReact.string("Step")} </button>
+    <button onClick={_ => start()}> {ReasonReact.string("Start")} </button>
   </div>;
 };
