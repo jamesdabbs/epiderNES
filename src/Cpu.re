@@ -1,20 +1,55 @@
-type state = option(Rawbones.Cpu.t);
+type state = {interval: option(Js.Global.intervalId)};
 
-module Display = {
-  [@react.component]
-  let make = (~cpu: Rawbones.Cpu.t) => {
-    let hex = int => Rawbones.Disassemble.to_hex(int) |> ReasonReact.string;
+[@react.component]
+let make = (~cpu: Rawbones.Cpu.t) => {
+  let forceUpdate = Hooks.useForceUpdate();
+  let (_, setState) = React.useState(() => ({interval: None}: state));
 
+  let str = ReasonReact.string;
+  let disassemble = Rawbones.Disassemble.make(cpu.memory);
+  let hex = int => Rawbones.Disassemble.to_hex(int) |> str;
+
+  let reset = () => {
+    Rawbones.Cpu.reset(cpu);
+    if (cpu.memory.rom.pathname == "nestest.nes") {
+      cpu.pc = 0xc000;
+    };
+    forceUpdate();
+  };
+
+  let step = () => {
+    Rawbones.Cpu.step(cpu);
+    forceUpdate();
+  };
+
+  let start = () => {
+    setState(state => {
+      let interval = Js.Global.setInterval(step, 1);
+      {...state, interval: Some(interval)};
+    });
+  };
+
+  let stop = () => {
+    setState(state => {
+      switch (state.interval) {
+      | Some(interval) => Js.Global.clearInterval(interval)
+      | _ => ()
+      };
+      {...state, interval: None};
+    });
+  };
+
+  <div>
     <table className="table">
       <thead>
         <tr>
-          <th> {ReasonReact.string("PC")} </th>
-          <th> {ReasonReact.string("Acc")} </th>
-          <th> {ReasonReact.string("X")} </th>
-          <th> {ReasonReact.string("Y")} </th>
-          <th> {ReasonReact.string("Status")} </th>
-          <th> {ReasonReact.string("Stack")} </th>
-          <th> {ReasonReact.string("Cycles")} </th>
+          <th> {str("PC")} </th>
+          <th> {str("Acc")} </th>
+          <th> {str("X")} </th>
+          <th> {str("Y")} </th>
+          <th> {str("Status")} </th>
+          <th> {str("Stack")} </th>
+          <th> {str("Cycles")} </th>
         </tr>
       </thead>
       <tbody>
@@ -28,72 +63,11 @@ module Display = {
           <td> {hex(cpu.cycles)} </td>
         </tr>
       </tbody>
-    </table>;
-  };
-};
-
-[@react.component]
-let make = () => {
-  let (state, setState) = React.useState(() => None);
-  let fileRef = React.useRef(Js.Nullable.null);
-
-  let loadRom = rom => {
-    setState(_ => {
-      let cpu =
-        Bytes.of_string(rom)
-        |> Rawbones.Rom.parse("loaded")
-        |> Rawbones.Memory.build
-        |> Rawbones.Cpu.build;
-
-      cpu.pc = 0xc000;
-
-      Some(cpu);
-    });
-  };
-
-  let step = () =>
-    setState(s =>
-      switch (s) {
-      | Some(cpu) =>
-        Rawbones.Cpu.step(cpu);
-        Some(Rawbones.Cpu.copy(cpu));
-      | _ => None
-      }
-    );
-
-  let start = () => {
-    Js.Global.setInterval(step, 1);
-    ();
-  };
-
-  let handleFileUpload: (string => unit) => unit = [%bs.raw
-    {|
-    function (handler) {
-      var reader = new FileReader();
-
-      reader.onload = function(event) {
-        handler(event.target.result);
-      };
-
-      reader.readAsBinaryString(fileRef.current.files[0]);
-    }
-  |}
-  ];
-
-  let preview =
-    switch (state) {
-    | None => <span />
-    | Some(cpu) => <Display cpu />
-    };
-
-  <div>
-    <input
-      type_="file"
-      ref={ReactDOMRe.Ref.domRef(fileRef)}
-      onChange={_ => handleFileUpload(loadRom)}
-    />
-    preview
-    <button onClick={_ => step()}> {ReasonReact.string("Step")} </button>
-    <button onClick={_ => start()}> {ReasonReact.string("Start")} </button>
+    </table>
+    <pre> {str(disassemble(cpu.pc, 5))} </pre>
+    <button onClick={_ => reset()}> {str("Reset")} </button>
+    <button onClick={_ => step()}> {str("Step")} </button>
+    <button onClick={_ => start()}> {str("Start")} </button>
+    <button onClick={_ => stop()}> {str("Stop")} </button>
   </div>;
 };
