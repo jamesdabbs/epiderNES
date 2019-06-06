@@ -1,17 +1,7 @@
 [@react.component]
 let make = (~onLoad) => {
-  let loadRom = (onLoad, filename, rom) => {
-    let cpu =
-      Bytes.of_string(rom)
-      |> Rawbones.Rom.parse(filename)
-      |> Rawbones.Memory.build
-      |> Rawbones.Cpu.build;
-
-    if (cpu.memory.rom.pathname == "nestest.nes") {
-      cpu.pc = 0xc000;
-    };
-
-    onLoad(cpu);
+  let loadRom = (filename, raw) => {
+    Util.cpu_of_string(filename, raw) |> onLoad;
   };
 
   let fileRef = React.useRef(Js.Nullable.null);
@@ -33,6 +23,6 @@ let make = (~onLoad) => {
   <input
     type_="file"
     ref={ReactDOMRe.Ref.domRef(fileRef)}
-    onChange={_ => handleFileUpload(loadRom(onLoad))}
+    onChange={_ => handleFileUpload(loadRom)}
   />;
 };

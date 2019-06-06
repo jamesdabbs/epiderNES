@@ -8,15 +8,34 @@ let make = () => {
 
   let preview =
     switch (state.cpu) {
-    | Some(cpu) => <> <h1> {ReasonReact.string("Cpu")} </h1> <Cpu cpu /> </>
+    | Some(cpu) => <Cpu cpu />
     | _ => <span />
     };
 
-  <div className="columns">
-    <div className="column">
-      <h1> {ReasonReact.string("Upload a ROM")} </h1>
-      <Upload onLoad=loadCpu />
-    </div>
-    <div className="column"> preview </div>
-  </div>;
+  <>
+    <nav className="navbar" role="navigation" ariaLabel="main navigation">
+      <div className="navbar-brand">
+        <a className="navbar-item" href="/">
+          <p> {ReasonReact.string("EpiderNES")} </p>
+        </a>
+      </div>
+      <div className="navbar-menu">
+        <div className="navbar-item has-dropdown is-hoverable">
+          <a className="navbar-link"> {ReasonReact.string("ROMs")} </a>
+          <div className="navbar-dropdown">
+            <PublicRom
+              className="navbar-item"
+              name="NEStest"
+              path="nestest.nes"
+              onLoad=loadCpu
+            />
+            <hr className="navbar-divider" />
+            <a className="navbar-item"> <Upload onLoad=loadCpu /> </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <hr />
+    preview
+  </>;
 };

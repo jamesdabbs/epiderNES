@@ -3,7 +3,7 @@ type state = {interval: option(Js.Global.intervalId)};
 [@react.component]
 let make = (~cpu: Rawbones.Cpu.t) => {
   let forceUpdate = Hooks.useForceUpdate();
-  let (_, setState) = React.useState(() => ({interval: None}: state));
+  let (state, setState) = React.useState(() => ({interval: None}: state));
 
   let str = ReasonReact.string;
   let disassemble = Rawbones.Disassemble.make(cpu.memory);
@@ -23,9 +23,9 @@ let make = (~cpu: Rawbones.Cpu.t) => {
   };
 
   let start = () => {
-    setState(state => {
-      let interval = Js.Global.setInterval(step, 1);
-      {...state, interval: Some(interval)};
+    setState(_ => {
+      let interval = Js.Global.setInterval(step, 10);
+      {interval: Some(interval)};
     });
   };
 
@@ -35,39 +35,61 @@ let make = (~cpu: Rawbones.Cpu.t) => {
       | Some(interval) => Js.Global.clearInterval(interval)
       | _ => ()
       };
-      {...state, interval: None};
+      {interval: None};
     });
   };
 
-  <div>
-    <table className="table">
-      <thead>
-        <tr>
-          <th> {str("PC")} </th>
-          <th> {str("Acc")} </th>
-          <th> {str("X")} </th>
-          <th> {str("Y")} </th>
-          <th> {str("Status")} </th>
-          <th> {str("Stack")} </th>
-          <th> {str("Cycles")} </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td> {hex(cpu.pc)} </td>
-          <td> {hex(cpu.acc)} </td>
-          <td> {hex(cpu.x)} </td>
-          <td> {hex(cpu.y)} </td>
-          <td> {hex(Rawbones.Flag.Register.to_int(cpu.status))} </td>
-          <td> {hex(cpu.stack)} </td>
-          <td> {hex(cpu.cycles)} </td>
-        </tr>
-      </tbody>
-    </table>
-    <pre> {str(disassemble(cpu.pc, 5))} </pre>
-    <button onClick={_ => reset()}> {str("Reset")} </button>
-    <button onClick={_ => step()}> {str("Step")} </button>
-    <button onClick={_ => start()}> {str("Start")} </button>
-    <button onClick={_ => stop()}> {str("Stop")} </button>
+  let run_toggle =
+    switch (state.interval) {
+    | Some(_) =>
+      <a className="card-footer-item" onClick={_ => stop()}>
+        {str("Stop")}
+      </a>
+    | None =>
+      <a className="card-footer-item" onClick={_ => start()}>
+        {str("Start")}
+      </a>
+    };
+
+  let controls =
+    <div className="card">
+      <header className="card-header">
+        <p className="card-header-title"> {str(cpu.memory.rom.pathname)} </p>
+      </header>
+      <div className="card-content">
+        <table className="table">
+          <tbody>
+            <tr> <th> {str("PC")} </th> <td> {hex(cpu.pc)} </td> </tr>
+            <tr> <th> {str("Acc")} </th> <td> {hex(cpu.acc)} </td> </tr>
+            <tr> <th> {str("X")} </th> <td> {hex(cpu.x)} </td> </tr>
+            <tr> <th> {str("Y")} </th> <td> {hex(cpu.y)} </td> </tr>
+            <tr>
+              <th> {str("Status")} </th>
+              <td> {hex(Rawbones.Flag.Register.to_int(cpu.status))} </td>
+            </tr>
+            <tr> <th> {str("Stack")} </th> <td> {hex(cpu.stack)} </td> </tr>
+            <tr>
+              <th> {str("Cycles")} </th>
+              <td> {hex(cpu.cycles)} </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <footer className="card-footer">
+        <a className="card-footer-item" onClick={_ => reset()}>
+          {str("Reset")}
+        </a>
+        <a className="card-footer-item" onClick={_ => step()}>
+          {str("Step")}
+        </a>
+        run_toggle
+      </footer>
+    </div>;
+
+  <div className="columns">
+    <div className="column is-one-quarter"> controls </div>
+    <div className="column">
+      <pre> {str(disassemble(cpu.pc, 25))} </pre>
+    </div>
   </div>;
 };

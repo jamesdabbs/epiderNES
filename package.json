@@ -5,6 +5,7 @@
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
     "clean": "bsb -clean-world",
+    "release": "git subtree push --prefix build origin gh-pages",
     "test": "echo \"Error: no test specified\" && exit 1",
     "webpack": "webpack -w",
     "webpack:production": "NODE_ENV=production webpack",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "bs-platform": "^5.0.4",
+    "copy-webpack-plugin": "^5.0.3",
     "html-webpack-plugin": "^3.2.0",
     "webpack": "^4.0.1",
     "webpack-cli": "^3.1.1",
