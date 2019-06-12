@@ -6,6 +6,14 @@ let make = () => {
 
   let loadCpu = cpu => setState(_ => {cpu: Some(cpu)});
 
+  React.useEffect(() => {
+    switch (state.cpu) {
+    | None => Util.loadRom("nestest.nes", loadCpu)
+    | _ => ()
+    };
+    None;
+  });
+
   let preview =
     switch (state.cpu) {
     | Some(cpu) => <Cpu cpu />

@@ -88,8 +88,9 @@ let make = (~cpu: Rawbones.Cpu.t) => {
 
   <div className="columns">
     <div className="column is-one-quarter"> controls </div>
-    <div className="column">
+    <div className="column is-half">
       <pre> {str(disassemble(cpu.pc, 25))} </pre>
     </div>
+    <div className="column is-half"> <Patterns rom={cpu.memory.rom} /> </div>
   </div>;
 };
