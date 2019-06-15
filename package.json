@@ -17,6 +17,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "bs-fetch": "^0.4.0",
     "rawbones": "0.1.5",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",

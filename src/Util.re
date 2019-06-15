@@ -40,34 +40,29 @@ let uploadRom:
     );
   };
 
+let string_of_array_buffer: Fetch.arrayBuffer => string = [%bs.raw
+  {|
+  function (arrayBuffer) {
+    const bytes = new Uint8Array(arrayBuffer);
+    return String.fromCharCode.apply(null, bytes);
+  }
+|}
+];
+
 let loadRom: (string, Rawbones.Cpu.t => unit) => unit =
-  (path, onLoad) => {
-    let doLoad: (string, (string, string) => unit) => unit = [%bs.raw
-      {|
-        function (path, handler) {
-          var request = new XMLHttpRequest();
-
-          request.open('GET', 'public/roms/' + path, true);
-          request.responseType = 'arraybuffer';
-
-          request.onload = function() {
-            if (request.status >= 200 && request.status < 400) {
-              const bytes = new Uint8Array(request.response);
-              const raw = String.fromCharCode.apply(null, bytes);
-
-              handler(path, raw);
-            } else {
-              alert('Failed to load ' + path);
-            }
-          };
-
-          request.send();
-        }
-      |}
-    ];
-
-    doLoad(path, (filename, raw) => cpu_of_string(filename, raw) |> onLoad);
-  };
+  (path, onLoad) =>
+    ignore(
+      Js.Promise.(
+        Fetch.fetch("public/roms/" ++ path)
+        |> then_(Fetch.Response.arrayBuffer)
+        |> then_(buf =>
+             string_of_array_buffer(buf)
+             |> cpu_of_string(path)
+             |> onLoad
+             |> resolve
+           )
+      ),
+    );
 
 let drawTiles:
   (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Pattern.Table.t) => unit = [%bs.raw
