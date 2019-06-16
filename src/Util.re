@@ -1,21 +1,12 @@
 let cpu_of_string = (filename, raw) => {
   let cpu =
-    Bytes.of_string(raw)
-    |> Rawbones.Rom.parse(filename)
-    |> Rawbones.Memory.build
-    |> Rawbones.Cpu.build;
-
-  if (cpu.memory.rom.pathname == "nestest.nes") {
-    cpu.pc = 0xc000;
-  } else {
-    Rawbones.Cpu.reset(cpu);
-  };
+    Bytes.of_string(raw) |> Rawbones.Rom.parse(filename) |> Rawbones.Nes.load;
 
   cpu;
 };
 
 let uploadRom:
-  (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Cpu.t => unit) => unit =
+  (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Nes.t => unit) => unit =
   (fileRef, onLoad) => {
     let doLoad:
       (React.Ref.t(Js.Nullable.t(Dom.element)), (string, string) => unit) =>
@@ -49,7 +40,7 @@ let string_of_array_buffer: Fetch.arrayBuffer => string = [%bs.raw
 |}
 ];
 
-let loadRom: (string, Rawbones.Cpu.t => unit) => unit =
+let loadRom: (string, Rawbones.Nes.t => unit) => unit =
   (path, onLoad) =>
     ignore(
       Js.Promise.(
@@ -101,4 +92,22 @@ let drawTiles:
       }
     }
   |}
+];
+
+let parseHex: string => Js.Nullable.t(int) = [%bs.raw
+  {|
+  function(str) {
+    const parsed = parseInt(str, 16);
+    return isNaN(parsed) ? null : parsed;
+  }
+|}
+];
+
+let displayHex: int => string = [%bs.raw
+  {|
+  function(value) {
+    const base = value.toString(16).toUpperCase();
+    return base.length == 1 ? "0" + base : base;
+  }
+|}
 ];
