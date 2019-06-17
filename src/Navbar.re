@@ -1,30 +1,33 @@
 [@react.component]
-let make = (~nes: option(Rawbones.Nes.t), ~onRomLoad) => {
+let make = (~nes: option(Rawbones.Nes.t), ~onRomLoad, ~running, ~dispatch) => {
   let link = (label, path) =>
     <a className="navbar-item" onClick={_ => ReasonReactRouter.push(path)}>
       {ReasonReact.string(label)}
     </a>;
 
-  let (title, controls) =
-    switch (nes) {
-    | Some(n) => (n.rom.pathname, <NavControls nes=n />)
-    | _ => ("EpiderNES", <span />)
-    };
-
   <nav className="navbar" role="navigation" ariaLabel="main navigation">
     <div className="navbar-brand">
       <a className="navbar-item" href="/">
-        <p> {ReasonReact.string(title)} </p>
+        <p>
+          {ReasonReact.string(
+             switch (nes) {
+             | Some(n) => n.rom.pathname
+             | _ => "EpiderNES"
+             },
+           )}
+        </p>
       </a>
     </div>
     <div className="navbar-menu">
       <div className="navbar-start">
-        {link("CPU", "/cpu")}
+        {link("CPU", "/")}
         {link("PPU", "/ppu")}
-        {link("ROM", "/rom")}
       </div>
       <div className="navbar-end">
-        controls
+        {switch (nes) {
+         | Some(n) => <NavControls nes=n running dispatch />
+         | _ => <span />
+         }}
         <div className="navbar-item has-dropdown is-hoverable">
           <a className="navbar-link"> {ReasonReact.string("ROMs")} </a>
           <div className="navbar-dropdown">

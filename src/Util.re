@@ -111,3 +111,9 @@ let displayHex: int => string = [%bs.raw
   }
 |}
 ];
+
+let setupDebugging: Rawbones.Nes.t => unit = [%bs.raw
+  {|
+  function(nes) { window.nes = nes; }
+|}
+];

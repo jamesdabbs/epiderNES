@@ -14,7 +14,6 @@ let make = (~nes: Rawbones.Nes.t) => {
     write_latch,
   } =
     ppu.registers;
-  let {Rawbones.Ppu.dma, nmi, new_frame} = ppu.status;
 
   let raw = {j|
 registers
@@ -28,11 +27,6 @@ registers
   buffer      $buffer
   fine_x      $fine_x
   write_latch $write_latch
-
-status
-  dma       $dma
-  nmi       $nmi
-  new_frame $new_frame
 |j};
 
   <pre> {ReasonReact.string(raw)} </pre>;
