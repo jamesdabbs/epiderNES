@@ -1,21 +1,18 @@
-let cpu_of_string = (filename, raw) => {
-  let cpu =
-    Bytes.of_string(raw)
-    |> Rawbones.Rom.parse(filename)
-    |> Rawbones.Memory.build
-    |> Rawbones.Cpu.build;
+let nes_of_string = (filename, raw) => {
+  let nes =
+    Bytes.of_string(raw) |> Rawbones.Rom.parse(filename) |> Rawbones.Nes.load;
 
-  if (cpu.memory.rom.pathname == "nestest.nes") {
-    cpu.pc = 0xc000;
+  if (filename == "nestest.nes") {
+    nes.cpu.pc = 0xc000;
   } else {
-    Rawbones.Cpu.reset(cpu);
+    Rawbones.Cpu.reset(nes.cpu);
   };
 
-  cpu;
+  nes;
 };
 
 let uploadRom:
-  (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Cpu.t => unit) => unit =
+  (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Nes.t => unit) => unit =
   (fileRef, onLoad) => {
     let doLoad:
       (React.Ref.t(Js.Nullable.t(Dom.element)), (string, string) => unit) =>
@@ -36,7 +33,7 @@ let uploadRom:
     ];
 
     doLoad(fileRef, (filename, raw) =>
-      cpu_of_string(filename, raw) |> onLoad
+      nes_of_string(filename, raw) |> onLoad
     );
   };
 
@@ -49,7 +46,7 @@ let string_of_array_buffer: Fetch.arrayBuffer => string = [%bs.raw
 |}
 ];
 
-let loadRom: (string, Rawbones.Cpu.t => unit) => unit =
+let loadRom: (string, Rawbones.Nes.t => unit) => unit =
   (path, onLoad) =>
     ignore(
       Js.Promise.(
@@ -57,7 +54,7 @@ let loadRom: (string, Rawbones.Cpu.t => unit) => unit =
         |> then_(Fetch.Response.arrayBuffer)
         |> then_(buf =>
              string_of_array_buffer(buf)
-             |> cpu_of_string(path)
+             |> nes_of_string(path)
              |> onLoad
              |> resolve
            )

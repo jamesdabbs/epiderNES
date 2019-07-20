@@ -1,22 +1,22 @@
-type state = {cpu: option(Rawbones.Cpu.t)};
+type state = {nes: option(Rawbones.Nes.t)};
 
 [@react.component]
 let make = () => {
-  let (state, setState) = React.useState(() => {cpu: None});
+  let (state, setState) = React.useState(() => {nes: None});
 
-  let loadCpu = cpu => setState(_ => {cpu: Some(cpu)});
+  let load = nes => setState(_ => {nes: Some(nes)});
 
   React.useEffect(() => {
-    switch (state.cpu) {
-    | None => Util.loadRom("nestest.nes", loadCpu)
+    switch (state.nes) {
+    | None => Util.loadRom("nestest.nes", load)
     | _ => ()
     };
     None;
   });
 
   let preview =
-    switch (state.cpu) {
-    | Some(cpu) => <Cpu cpu />
+    switch (state.nes) {
+    | Some(nes) => <Cpu cpu={nes.cpu} filename={nes.rom.pathname} />
     | _ => <span />
     };
 
@@ -35,10 +35,10 @@ let make = () => {
               className="navbar-item"
               name="NEStest"
               path="nestest.nes"
-              onLoad=loadCpu
+              onLoad=load
             />
             <hr className="navbar-divider" />
-            <a className="navbar-item"> <Upload onLoad=loadCpu /> </a>
+            <a className="navbar-item"> <Upload onLoad=load /> </a>
           </div>
         </div>
       </div>

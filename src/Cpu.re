@@ -1,7 +1,7 @@
 type state = {interval: option(Js.Global.intervalId)};
 
 [@react.component]
-let make = (~cpu: Rawbones.Cpu.t) => {
+let make = (~cpu: Rawbones.Cpu.t, ~filename: String.t) => {
   let forceUpdate = Hooks.useForceUpdate();
   let (state, setState) = React.useState(() => ({interval: None}: state));
 
@@ -11,7 +11,7 @@ let make = (~cpu: Rawbones.Cpu.t) => {
 
   let reset = () => {
     Rawbones.Cpu.reset(cpu);
-    if (cpu.memory.rom.pathname == "nestest.nes") {
+    if (filename == "nestest.nes") {
       cpu.pc = 0xc000;
     };
     forceUpdate();
@@ -54,7 +54,7 @@ let make = (~cpu: Rawbones.Cpu.t) => {
   let controls =
     <div className="card">
       <header className="card-header">
-        <p className="card-header-title"> {str(cpu.memory.rom.pathname)} </p>
+        <p className="card-header-title"> {str(filename)} </p>
       </header>
       <div className="card-content">
         <table className="table">
@@ -91,6 +91,5 @@ let make = (~cpu: Rawbones.Cpu.t) => {
     <div className="column is-half">
       <pre> {str(disassemble(cpu.pc, 25))} </pre>
     </div>
-    <div className="column is-half"> <Patterns rom={cpu.memory.rom} /> </div>
   </div>;
 };
