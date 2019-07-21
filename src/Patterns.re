@@ -1,6 +1,6 @@
 [@react.component]
 let make = (~rom: Rawbones.Rom.t) => {
-  let table = Rawbones.Pattern.Table.load(rom);
+  let table = Rawbones.Pattern.Table.load(rom.chr);
 
   let canvasRef = React.useRef(Js.Nullable.null);
 

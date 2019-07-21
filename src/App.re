@@ -53,8 +53,12 @@ let make = _children => {
       )
     | Running(interval) =>
       ReasonReact.Update({...state, refresh: Some(interval)})
-    | StepCpu => mutate(state, Rawbones.Nes.step)
-    | StepFrame => mutate(state, Rawbones.Nes.step_frame)
+    | StepCpu =>
+      mutate(state, nes => Rawbones.Nes.step(nes, ~on_frame=_ => ()))
+    | StepFrame =>
+      mutate(state, nes =>
+        ignore(Rawbones.Nes.step_frame(nes, ~on_frame=_ => ()))
+      )
     | Stop => ReasonReact.Update(stopRunning(state))
     | _ => ReasonReact.NoUpdate
     },

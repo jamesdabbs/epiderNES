@@ -1,8 +1,14 @@
-let cpu_of_string = (filename, raw) => {
-  let cpu =
+let nes_of_string = (filename, raw) => {
+  let nes =
     Bytes.of_string(raw) |> Rawbones.Rom.parse(filename) |> Rawbones.Nes.load;
 
-  cpu;
+  if (filename == "nestest.nes") {
+    nes.cpu.pc = 0xc000;
+  } else {
+    Rawbones.Cpu.reset(nes.cpu);
+  };
+
+  nes;
 };
 
 let uploadRom:
@@ -27,7 +33,7 @@ let uploadRom:
     ];
 
     doLoad(fileRef, (filename, raw) =>
-      cpu_of_string(filename, raw) |> onLoad
+      nes_of_string(filename, raw) |> onLoad
     );
   };
 
@@ -48,7 +54,7 @@ let loadRom: (string, Rawbones.Nes.t => unit) => unit =
         |> then_(Fetch.Response.arrayBuffer)
         |> then_(buf =>
              string_of_array_buffer(buf)
-             |> cpu_of_string(path)
+             |> nes_of_string(path)
              |> onLoad
              |> resolve
            )
