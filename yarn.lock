@@ -3146,10 +3146,10 @@ raw-body@2.4.0:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
-rawbones@0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/rawbones/-/rawbones-0.2.1.tgz#2bae059d0c357e8783b1041adb9a4a34d24f6a74"
-  integrity sha512-H9ZZKiBp2nGB0Xm+QhzlM0jrkWvKneDQPF6kPgYrOlMHPPs5ChWQ+JLR1RdLU08I3t08GnRpKMJX+D/GyAp0hg==
+rawbones@0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/rawbones/-/rawbones-0.2.2.tgz#dc716e34d534d415481fa2fe2ea693dc05b485a6"
+  integrity sha512-8HQVCAqoNAsqcyM0mznz9oy3rndcIJ3IgfdBDcdq1NOCVpZv1oUDPmjjjS4Y4J3S3n0eM+YIs8nPh7SdqmQgMQ==
   dependencies:
     "@glennsl/bs-json" "^3.0.0"
 

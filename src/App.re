@@ -57,7 +57,9 @@ let make = _children => {
       mutate(state, nes => Rawbones.Nes.step(nes, ~on_frame=_ => ()))
     | StepFrame =>
       mutate(state, nes =>
-        ignore(Rawbones.Nes.step_frame(nes, ~on_frame=_ => ()))
+        ignore(
+          Rawbones.Nes.step_frame(nes, ~on_frame=result => nes.frame = result),
+        )
       )
     | Stop => ReasonReact.Update(stopRunning(state))
     | _ => ReasonReact.NoUpdate
@@ -71,7 +73,13 @@ let make = _children => {
 
     let main =
       switch (self.state.nes) {
-      | Some(nes) => <Nes nes dispatch />
+      | Some(nes) =>
+        <>
+          <section className="columns is-centered">
+            <Display frame={nes.frame} />
+          </section>
+          <section className="section"> <Nes nes dispatch /> </section>
+        </>
       | _ => <span />
       };
 
