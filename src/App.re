@@ -1,28 +1,40 @@
 type state = {
   nes: option(Rawbones.Nes.t),
-  refresh: option(Js.Global.intervalId),
+  refresh: option(int),
   continue: ref(bool),
 };
 
 let component = ReasonReact.reducerComponent("App");
 
+let mutateRaw = (state, handler) => {
+  switch (state.nes) {
+  | Some(nes) => handler(nes)
+  | _ => ()
+  };
+};
+
 let mutate = (state, handler) =>
   ReasonReact.UpdateWithSideEffects(
     state,
-    self =>
-      switch (self.state.nes) {
-      | Some(nes) => handler(nes)
-      | _ => ()
-      },
+    self => mutateRaw(self.state, handler),
   );
+
+let handleInput = (keycode, pressed, nes: Rawbones.Nes.t) => {
+  switch (keycode) {
+  | 38 => nes.gamepad.up = pressed
+  | 40 => nes.gamepad.down = pressed
+  | 37 => nes.gamepad.left = pressed
+  | 39 => nes.gamepad.right = pressed
+  | 32 => nes.gamepad.select = pressed
+  | 13 => nes.gamepad.start = pressed
+  | 90 => nes.gamepad.a = pressed
+  | 88 => nes.gamepad.b = pressed
+  | _ => ()
+  };
+};
 
 let stopRunning = state => {
   state.continue := false;
-
-  switch (state.refresh) {
-  | Some(intervalId) => Js.Global.clearInterval(intervalId)
-  | _ => ()
-  };
 
   {...state, refresh: None};
 };
@@ -35,6 +47,12 @@ let make = _children => {
   reducer: (action: Action.t, state: state) =>
     switch (action) {
     | Dirty => mutate(state, _ => ())
+    | KeyDown(x) =>
+      mutateRaw(state, handleInput(x, true));
+      ReasonReact.NoUpdate;
+    | KeyUp(x) =>
+      mutateRaw(state, handleInput(x, false));
+      ReasonReact.NoUpdate;
     | Load(nes) =>
       Util.setupDebugging(nes);
       ReasonReact.Update({...state, nes: Some(nes)});
@@ -51,22 +69,17 @@ let make = _children => {
               },
           })
       )
-    | Running(interval) =>
-      ReasonReact.Update({...state, refresh: Some(interval)})
-    | StepCpu =>
-      mutate(state, nes => Rawbones.Nes.step(nes, ~on_frame=_ => ()))
+    | Running(interval) => ReasonReact.Update({...state, refresh: None})
+    | StepCpu => mutate(state, nes => Rawbones.Nes.step(nes))
     | StepFrame =>
-      mutate(state, nes =>
-        ignore(
-          Rawbones.Nes.step_frame(nes, ~on_frame=result => nes.frame = result),
-        )
-      )
+      mutate(state, nes => nes.frame = Rawbones.Nes.step_frame(nes))
     | Stop => ReasonReact.Update(stopRunning(state))
     | _ => ReasonReact.NoUpdate
     },
 
-  didMount: self =>
-    Util.loadRom("nestest.nes", nes => self.send(Action.Load(nes))),
+  didMount: self => {
+    Util.loadRom("nestest.nes", nes => self.send(Action.Load(nes)));
+  },
 
   render: self => {
     let dispatch = action => self.send(action);
@@ -76,7 +89,7 @@ let make = _children => {
       | Some(nes) =>
         <>
           <section className="columns is-centered">
-            <Display frame={nes.frame} />
+            <Display frame={nes.frame} dispatch />
           </section>
           <section className="section"> <Nes nes dispatch /> </section>
         </>
