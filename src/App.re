@@ -1,7 +1,7 @@
 type state = {
   nes: option(Rawbones.Nes.t),
   refresh: option(int),
-  continue: ref(bool),
+  last_frame_at: option(float),
 };
 
 let component = ReasonReact.reducerComponent("App");
@@ -19,6 +19,38 @@ let mutate = (state, handler) =>
     self => mutateRaw(self.state, handler),
   );
 
+let stop = state => {
+  switch (state.refresh) {
+  | Some(id) =>
+    Util.cancelAnimationFrame(id);
+    {...state, refresh: None, last_frame_at: None};
+  | None => state
+  };
+};
+
+let rec nextFrame = self => {
+  switch (self.ReasonReact.state.last_frame_at) {
+  | Some(time) =>
+    Js.log("Frame duration: " ++ Js.Float.toString(Util.now() -. time))
+  | None => ()
+  };
+  self.ReasonReact.send(Action.StepFrame);
+  let refreshId = Util.requestAnimationFrame(() => nextFrame(self));
+  self.ReasonReact.send(Action.QueueFrame(refreshId));
+};
+
+let start = self => {
+  let refreshId = Util.requestAnimationFrame(() => nextFrame(self));
+  self.ReasonReact.send(Action.QueueFrame(refreshId));
+};
+
+let reset = state => {
+  switch (state.nes) {
+  | Some(nes) => {...state, nes: Some(Rawbones.Nes.load(nes.rom))}
+  | None => {...state, nes: None}
+  };
+};
+
 let handleInput = (keycode, pressed, nes: Rawbones.Nes.t) => {
   switch (keycode) {
   | 38 => nes.gamepad.up = pressed
@@ -33,16 +65,10 @@ let handleInput = (keycode, pressed, nes: Rawbones.Nes.t) => {
   };
 };
 
-let stopRunning = state => {
-  state.continue := false;
-
-  {...state, refresh: None};
-};
-
 let make = _children => {
   ...component,
 
-  initialState: () => {nes: None, refresh: None, continue: ref(false)},
+  initialState: () => {nes: None, refresh: None, last_frame_at: None},
 
   reducer: (action: Action.t, state: state) =>
     switch (action) {
@@ -56,25 +82,13 @@ let make = _children => {
     | Load(nes) =>
       Util.setupDebugging(nes);
       ReasonReact.Update({...state, nes: Some(nes)});
-    | Reset =>
-      stopRunning(state)
-      |> (
-        s =>
-          ReasonReact.Update({
-            ...s,
-            nes:
-              switch (state.nes) {
-              | Some(nes) => Some(Rawbones.Nes.load(nes.rom))
-              | None => None
-              },
-          })
-      )
-    | Running(interval) => ReasonReact.Update({...state, refresh: None})
+    | Reset => ReasonReact.Update(reset(state))
     | StepCpu => mutate(state, nes => Rawbones.Nes.step(nes))
     | StepFrame =>
       mutate(state, nes => nes.frame = Rawbones.Nes.step_frame(nes))
-    | Stop => ReasonReact.Update(stopRunning(state))
-    | _ => ReasonReact.NoUpdate
+    | Stop => ReasonReact.Update(stop(state))
+    | QueueFrame(id) => ReasonReact.Update({...state, refresh: Some(id)})
+    | Start => ReasonReact.SideEffects(self => start(self))
     },
 
   didMount: self => {
@@ -96,7 +110,7 @@ let make = _children => {
       | _ => <span />
       };
 
-    let running = self.state.continue^;
+    let running = self.state.refresh;
 
     <>
       <Navbar

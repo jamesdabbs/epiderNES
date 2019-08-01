@@ -168,3 +168,9 @@ let setupDebugging: Rawbones.Nes.t => unit = [%bs.raw
   function(nes) { window.nes = nes; }
 |}
 ];
+
+[@bs.val]
+external requestAnimationFrame: (unit => unit) => int =
+  "requestAnimationFrame";
+[@bs.val] external cancelAnimationFrame: int => unit = "cancelAnimationFrame";
+[@bs.val] [@bs.scope "performance"] external now: unit => float = "now";

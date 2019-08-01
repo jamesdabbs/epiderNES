@@ -1,11 +1,14 @@
+type requestId = int;
+type charcode = int;
+
 type t =
   | Load(Rawbones.Nes.t)
-  | KeyDown(int)
-  | KeyUp(int)
-  | Play
   | Reset
-  | Running(Js.Global.intervalId)
   | Dirty
   | StepCpu
   | StepFrame
-  | Stop;
+  | KeyDown(charcode)
+  | KeyUp(charcode)
+  | QueueFrame(requestId)
+  | Stop
+  | Start;
