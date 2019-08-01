@@ -1,7 +1,9 @@
 type state = {
   nes: option(Rawbones.Nes.t),
   refresh: option(int),
-  last_frame_at: option(float),
+  fps: option(int),
+  frame_count: int,
+  last_fps_at: option(float),
 };
 
 let component = ReasonReact.reducerComponent("App");
@@ -19,21 +21,33 @@ let mutate = (state, handler) =>
     self => mutateRaw(self.state, handler),
   );
 
+let nextFps = state => {
+  ...state,
+  last_fps_at: Some(Util.now()),
+  fps: Some(state.frame_count),
+  frame_count: 0,
+};
+
+let countFrames = state => {
+  let newState = {...state, frame_count: state.frame_count + 1};
+  switch (state.last_fps_at) {
+  | None => {...newState, last_fps_at: Some(Util.now())}
+  | Some(time) =>
+    let elapsed = int_of_float(Util.now() -. time);
+    elapsed > 1000 ? nextFps(state) : newState;
+  };
+};
+
 let stop = state => {
   switch (state.refresh) {
   | Some(id) =>
     Util.cancelAnimationFrame(id);
-    {...state, refresh: None, last_frame_at: None};
+    {...state, refresh: None, frame_count: 0, last_fps_at: None};
   | None => state
   };
 };
 
 let rec nextFrame = self => {
-  switch (self.ReasonReact.state.last_frame_at) {
-  | Some(time) =>
-    Js.log("Frame duration: " ++ Js.Float.toString(Util.now() -. time))
-  | None => ()
-  };
   self.ReasonReact.send(Action.StepFrame);
   let refreshId = Util.requestAnimationFrame(() => nextFrame(self));
   self.ReasonReact.send(Action.QueueFrame(refreshId));
@@ -68,7 +82,13 @@ let handleInput = (keycode, pressed, nes: Rawbones.Nes.t) => {
 let make = _children => {
   ...component,
 
-  initialState: () => {nes: None, refresh: None, last_frame_at: None},
+  initialState: () => {
+    nes: None,
+    refresh: None,
+    fps: None,
+    frame_count: 0,
+    last_fps_at: None,
+  },
 
   reducer: (action: Action.t, state: state) =>
     switch (action) {
@@ -85,7 +105,8 @@ let make = _children => {
     | Reset => ReasonReact.Update(reset(state))
     | StepCpu => mutate(state, nes => Rawbones.Nes.step(nes))
     | StepFrame =>
-      mutate(state, nes => nes.frame = Rawbones.Nes.step_frame(nes))
+      let newState = countFrames(state);
+      mutate(newState, nes => nes.frame = Rawbones.Nes.step_frame(nes));
     | Stop => ReasonReact.Update(stop(state))
     | QueueFrame(id) => ReasonReact.Update({...state, refresh: Some(id)})
     | Start => ReasonReact.SideEffects(self => start(self))
@@ -116,6 +137,7 @@ let make = _children => {
       <Navbar
         nes={self.state.nes}
         onRomLoad={nes => dispatch(Action.Load(nes))}
+        fps={self.state.fps}
         running
         dispatch
       />

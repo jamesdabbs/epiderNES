@@ -1,9 +1,19 @@
 [@react.component]
-let make = (~nes: option(Rawbones.Nes.t), ~onRomLoad, ~running, ~dispatch) => {
+let make =
+    (~nes: option(Rawbones.Nes.t), ~onRomLoad, ~fps, ~running, ~dispatch) => {
   let link = (label, path) =>
     <a className="navbar-item" onClick={_ => ReasonReactRouter.push(path)}>
       {ReasonReact.string(label)}
     </a>;
+
+  let framerate =
+    switch (fps) {
+    | None => ReasonReact.null
+    | Some(x) =>
+      <a className="navbar-item">
+        {ReasonReact.string("FPS: " ++ string_of_int(x))}
+      </a>
+    };
 
   <nav className="navbar" role="navigation" ariaLabel="main navigation">
     <div className="navbar-brand">
@@ -22,6 +32,7 @@ let make = (~nes: option(Rawbones.Nes.t), ~onRomLoad, ~running, ~dispatch) => {
       <div className="navbar-start">
         {link("CPU", "/")}
         {link("PPU", "/ppu")}
+        framerate
       </div>
       <div className="navbar-end">
         {switch (nes) {
