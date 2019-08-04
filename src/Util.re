@@ -1,15 +1,5 @@
-let nes_of_string = (filename, raw) => {
-  let nes =
-    Bytes.of_string(raw) |> Rawbones.Rom.parse(filename) |> Rawbones.Nes.load;
-
-  if (filename == "nestest.nes") {
-    nes.cpu.pc = 0xc000;
-  } else {
-    Rawbones.Cpu.reset(nes.cpu);
-  };
-
-  nes;
-};
+let nes_of_string = (filename, raw) =>
+  Bytes.of_string(raw) |> Rawbones.Rom.parse(filename) |> Rawbones.Nes.load;
 
 let uploadRom:
   (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Nes.t => unit) => unit =
@@ -61,6 +51,61 @@ let loadRom: (string, Rawbones.Nes.t => unit) => unit =
       ),
     );
 
+let displayFrame:
+  (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Render.frame) => unit = [%bs.raw
+  {|
+    function (ref, framebuffer) {
+      const ctx = ref.current.getContext('2d', { alpha: false });
+      const rgba_bytes = new Uint8ClampedArray(256 * 240 * 4);
+      let rgba_offset = 0;
+      for (let i = 0; i < framebuffer.length; i = i + 3) {
+        rgba_bytes[rgba_offset + 0] = framebuffer[i + 0];
+        rgba_bytes[rgba_offset + 1] = framebuffer[i + 1];
+        rgba_bytes[rgba_offset + 2] = framebuffer[i + 2];
+        rgba_bytes[rgba_offset + 3] = 255;
+        rgba_offset = rgba_offset + 4;
+      }
+      const image = new ImageData(rgba_bytes, 256, 240);
+      ctx.putImageData(image, 0, 0);
+    }
+  |}
+];
+
+let displayFrameScaled:
+  (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Render.frame) => unit = [%bs.raw
+  {|
+    function (ref, framebuffer) {
+      const ctx = ref.current.getContext('2d', { alpha: false });
+      const rgba_bytes = new Uint8ClampedArray(512 * 480 * 4);
+      let rgba_offset = 0;
+      for (let i = 0; i < framebuffer.length; i = i + 3) {
+        rgba_bytes[rgba_offset + 0] = framebuffer[i + 0];
+        rgba_bytes[rgba_offset + 4] = framebuffer[i + 0];
+        rgba_bytes[rgba_offset + 1] = framebuffer[i + 1];
+        rgba_bytes[rgba_offset + 5] = framebuffer[i + 1];
+        rgba_bytes[rgba_offset + 2] = framebuffer[i + 2];
+        rgba_bytes[rgba_offset + 6] = framebuffer[i + 2];
+        rgba_bytes[rgba_offset + 3] = 255;
+        rgba_bytes[rgba_offset + 7] = 255;
+        rgba_bytes[rgba_offset + 2048 + 0] = framebuffer[i + 0];
+        rgba_bytes[rgba_offset + 2048 + 4] = framebuffer[i + 0];
+        rgba_bytes[rgba_offset + 2048 + 1] = framebuffer[i + 1];
+        rgba_bytes[rgba_offset + 2048 + 5] = framebuffer[i + 1];
+        rgba_bytes[rgba_offset + 2048 + 2] = framebuffer[i + 2];
+        rgba_bytes[rgba_offset + 2048 + 6] = framebuffer[i + 2];
+        rgba_bytes[rgba_offset + 2048 + 3] = 255;
+        rgba_bytes[rgba_offset + 2048 + 7] = 255;
+        rgba_offset = rgba_offset + 8;
+        if (i % 768 == 0) {
+          rgba_offset = rgba_offset + 2048;
+        }
+      }
+      const image = new ImageData(rgba_bytes, 512, 480);
+      ctx.putImageData(image, 0, 0);
+    }
+  |}
+];
+
 let drawTiles:
   (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Pattern.Table.t) => unit = [%bs.raw
   {|
@@ -99,3 +144,33 @@ let drawTiles:
     }
   |}
 ];
+
+let parseHex: string => Js.Nullable.t(int) = [%bs.raw
+  {|
+  function(str) {
+    const parsed = parseInt(str, 16);
+    return isNaN(parsed) ? null : parsed;
+  }
+|}
+];
+
+let displayHex: int => string = [%bs.raw
+  {|
+  function(value) {
+    const base = value.toString(16).toUpperCase();
+    return base.length == 1 ? "0" + base : base;
+  }
+|}
+];
+
+let setupDebugging: Rawbones.Nes.t => unit = [%bs.raw
+  {|
+  function(nes) { window.nes = nes; }
+|}
+];
+
+[@bs.val]
+external requestAnimationFrame: (unit => unit) => int =
+  "requestAnimationFrame";
+[@bs.val] external cancelAnimationFrame: int => unit = "cancelAnimationFrame";
+[@bs.val] [@bs.scope "performance"] external now: unit => float = "now";

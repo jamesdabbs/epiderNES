@@ -1,95 +1,54 @@
-type state = {interval: option(Js.Global.intervalId)};
+module Disassembly = {
+  [@react.component]
+  let make = (~nes: Rawbones.Nes.t, ~rows: int) => {
+    let cpu = nes.cpu;
 
-[@react.component]
-let make = (~cpu: Rawbones.Cpu.t, ~filename: String.t) => {
-  let forceUpdate = Hooks.useForceUpdate();
-  let (state, setState) = React.useState(() => ({interval: None}: state));
+    let disassemble = Rawbones.Disassemble.make(cpu.memory);
+    let inspector = Rawbones.Disassemble.inspector(cpu.memory);
 
-  let str = ReasonReact.string;
-  let disassemble = Rawbones.Disassemble.make(cpu.memory);
-  let hex = int => Rawbones.Disassemble.to_hex(int) |> str;
+    <pre>
+      {ReasonReact.string("              ;; " ++ inspector(cpu.pc) ++ "\n")}
+      {ReasonReact.string(disassemble(cpu.pc, rows))}
+    </pre>;
+  };
+};
 
-  let reset = () => {
-    Rawbones.Cpu.reset(cpu);
-    if (filename == "nestest.nes") {
-      cpu.pc = 0xc000;
+module Registers = {
+  module Row = {
+    [@react.component]
+    let make = (~label: string, ~value: 'a, ~setValue: 'a => unit) => {
+      <tr>
+        <th> <code> {ReasonReact.string(label)} </code> </th>
+        <td> <HexInput value setValue /> </td>
+      </tr>;
     };
-    forceUpdate();
   };
 
-  let step = () => {
-    Rawbones.Cpu.step(cpu);
-    forceUpdate();
-  };
+  [@react.component]
+  let make = (~nes: Rawbones.Nes.t, ~dispatch) => {
+    let cpu = nes.cpu;
 
-  let start = () => {
-    setState(_ => {
-      let interval = Js.Global.setInterval(step, 10);
-      {interval: Some(interval)};
-    });
-  };
-
-  let stop = () => {
-    setState(state => {
-      switch (state.interval) {
-      | Some(interval) => Js.Global.clearInterval(interval)
-      | _ => ()
+    let row = (label, value, setValue) => {
+      let set = x => {
+        setValue(x);
+        dispatch(Action.Dirty);
       };
-      {interval: None};
-    });
-  };
 
-  let run_toggle =
-    switch (state.interval) {
-    | Some(_) =>
-      <a className="card-footer-item" onClick={_ => stop()}>
-        {str("Stop")}
-      </a>
-    | None =>
-      <a className="card-footer-item" onClick={_ => start()}>
-        {str("Start")}
-      </a>
+      <Row label value setValue=set />;
     };
 
-  let controls =
-    <div className="card">
-      <header className="card-header">
-        <p className="card-header-title"> {str(filename)} </p>
-      </header>
-      <div className="card-content">
-        <table className="table">
-          <tbody>
-            <tr> <th> {str("PC")} </th> <td> {hex(cpu.pc)} </td> </tr>
-            <tr> <th> {str("Acc")} </th> <td> {hex(cpu.acc)} </td> </tr>
-            <tr> <th> {str("X")} </th> <td> {hex(cpu.x)} </td> </tr>
-            <tr> <th> {str("Y")} </th> <td> {hex(cpu.y)} </td> </tr>
-            <tr>
-              <th> {str("Status")} </th>
-              <td> {hex(Rawbones.Flag.Register.to_int(cpu.status))} </td>
-            </tr>
-            <tr> <th> {str("Stack")} </th> <td> {hex(cpu.stack)} </td> </tr>
-            <tr>
-              <th> {str("Cycles")} </th>
-              <td> {hex(cpu.cycles)} </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <footer className="card-footer">
-        <a className="card-footer-item" onClick={_ => reset()}>
-          {str("Reset")}
-        </a>
-        <a className="card-footer-item" onClick={_ => step()}>
-          {str("Step")}
-        </a>
-        run_toggle
-      </footer>
-    </div>;
-
-  <div className="columns">
-    <div className="column is-one-quarter"> controls </div>
-    <div className="column is-half">
-      <pre> {str(disassemble(cpu.pc, 25))} </pre>
-    </div>
-  </div>;
+    <table className="table">
+      <tbody>
+        {row("PC", cpu.pc, pc => cpu.pc = pc)}
+        {row("ACC", cpu.acc, acc => cpu.acc = acc)}
+        {row("X", cpu.x, x => cpu.x = x)}
+        {row("Y", cpu.y, y => cpu.y = y)}
+        {row("Status", Rawbones.Flag.Register.to_int(cpu.status), status =>
+           cpu.status = Rawbones.Flag.Register.from_int(status)
+         )}
+        {row("Stack", cpu.stack, stack => cpu.stack = stack)}
+        {row("Cycles", cpu.cycles, cycles => cpu.cycles = cycles)}
+      </tbody>
+    </table>;
+  };
 };
