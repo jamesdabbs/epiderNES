@@ -119,6 +119,8 @@ let make = _children => {
   render: self => {
     let dispatch = action => self.send(action);
 
+    let running = self.state.refresh;
+
     let main =
       switch (self.state.nes) {
       | Some(nes) =>
@@ -130,8 +132,6 @@ let make = _children => {
         </>
       | _ => <span />
       };
-
-    let running = self.state.refresh;
 
     <>
       <Navbar
