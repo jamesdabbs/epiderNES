@@ -1,5 +1,5 @@
 type requestId = int;
-type charcode = int;
+type character = char;
 
 type t =
   | Load(Rawbones.Nes.t)
@@ -7,8 +7,8 @@ type t =
   | Dirty
   | StepCpu
   | StepFrame
-  | KeyDown(charcode)
-  | KeyUp(charcode)
+  | KeyDown(character)
+  | KeyUp(character)
   | QueueFrame(requestId)
   | Stop
   | Start;

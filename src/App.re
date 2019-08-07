@@ -67,14 +67,14 @@ let reset = state => {
 
 let handleInput = (keycode, pressed, nes: Rawbones.Nes.t) => {
   switch (keycode) {
-  | 38 => nes.gamepad.up = pressed
-  | 40 => nes.gamepad.down = pressed
-  | 37 => nes.gamepad.left = pressed
-  | 39 => nes.gamepad.right = pressed
-  | 32 => nes.gamepad.select = pressed
-  | 13 => nes.gamepad.start = pressed
-  | 90 => nes.gamepad.a = pressed
-  | 88 => nes.gamepad.b = pressed
+  | 'W' => nes.gamepad.up = pressed
+  | 'S' => nes.gamepad.down = pressed
+  | 'A' => nes.gamepad.left = pressed
+  | 'D' => nes.gamepad.right = pressed
+  | '\b' => nes.gamepad.select = pressed
+  | '\r' => nes.gamepad.start = pressed
+  | 'J' => nes.gamepad.a = pressed
+  | 'K' => nes.gamepad.b = pressed
   | _ => ()
   };
 };
@@ -125,7 +125,7 @@ let make = _children => {
       switch (self.state.nes) {
       | Some(nes) =>
         <>
-          <section className="columns is-centered">
+          <section className="section">
             <Display frame={nes.frame} dispatch />
           </section>
           <section className="section"> <Nes nes dispatch /> </section>
