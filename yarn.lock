@@ -3245,10 +3245,10 @@ raw-body@2.4.0:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
-rawbones@0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/rawbones/-/rawbones-0.3.1.tgz#186bc252856ead29f4940172e256e74ae3a6c632"
-  integrity sha512-8iQacnpOv3omUrgHu5gWEeZeqStvVCiLr+ombrEe6GUpAJBdFt9NInwTQdeZvlIx3431dbJVcbaiUTNlC/NZiw==
+rawbones@0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/rawbones/-/rawbones-0.3.2.tgz#3e007d84d3b5e6ac6084155ffce164776a4bff91"
+  integrity sha512-6+X7twOsegft4bXZIh4+dTNOnOczdCsNPWt1cwf+NZQm+eoHYozJ0A6NeBFUT5i+6ty81GkG8ElfxKCa8ltuEg==
   dependencies:
     "@glennsl/bs-json" "^3.0.0"
 

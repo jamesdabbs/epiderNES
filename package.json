@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "bs-fetch": "^0.4.0",
-    "rawbones": "0.3.1",
+    "rawbones": "0.3.2",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
     "reason-react": ">=0.7.0"
