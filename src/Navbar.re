@@ -17,7 +17,7 @@ let make =
 
   <nav className="navbar" role="navigation" ariaLabel="main navigation">
     <div className="navbar-brand">
-      <a className="navbar-item" href="/">
+      <a className="navbar-item" href="/epiderNES">
         <p>
           {ReasonReact.string(
              switch (nes) {
@@ -30,8 +30,8 @@ let make =
     </div>
     <div className="navbar-menu">
       <div className="navbar-start">
-        {link("CPU", "/")}
-        {link("PPU", "/ppu")}
+        {link("CPU", "/epiderNES/cpu")}
+        {link("PPU", "/epiderNES/ppu")}
         framerate
       </div>
       <div className="navbar-end">

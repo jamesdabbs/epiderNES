@@ -10,8 +10,9 @@ let make = (~nes: Rawbones.Nes.t, ~dispatch) => {
     </div>;
 
   switch (url.path) {
-  | [] => main
-  | ["ppu"] => <Nametable nes />
+  | ["epiderNES"] => ReasonReact.null
+  | ["epiderNES", "cpu"] => main
+  | ["epiderNES", "ppu"] => <Nametable nes />
   | _ => <p> {ReasonReact.string("Not found")} </p>
   };
 };
