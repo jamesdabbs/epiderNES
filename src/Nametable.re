@@ -63,7 +63,6 @@ module Row = {
 [@react.component]
 let make = (~nes: Rawbones.Nes.t) => {
   let nameTable = nes.ppu.name_table;
-
   <div className="columns">
     <div className="column is-3"> <Patterns rom={nes.rom} /> </div>
     <div className="column is-5">

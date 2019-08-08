@@ -43,6 +43,18 @@ let make =
               path="nestest.nes"
               onLoad=onRomLoad
             />
+            <PublicRom
+              className="navbar-item"
+              name="2048"
+              path="2048.nes"
+              onLoad=onRomLoad
+            />
+            <PublicRom
+              className="navbar-item"
+              name="Snake"
+              path="snake.nes"
+              onLoad=onRomLoad
+            />
             <hr className="navbar-divider" />
             <a className="navbar-item"> <Upload onLoad=onRomLoad /> </a>
           </div>

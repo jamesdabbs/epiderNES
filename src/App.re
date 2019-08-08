@@ -118,20 +118,7 @@ let make = _children => {
 
   render: self => {
     let dispatch = action => self.send(action);
-
     let running = self.state.refresh;
-
-    let main =
-      switch (self.state.nes) {
-      | Some(nes) =>
-        <>
-          <section className="section">
-            <Display frame={nes.frame} dispatch />
-          </section>
-          <section className="section"> <Nes nes dispatch /> </section>
-        </>
-      | _ => <span />
-      };
 
     <>
       <Navbar
@@ -141,7 +128,9 @@ let make = _children => {
         running
         dispatch
       />
-      main
+      <section className="section">
+        <Nes dispatch nes={self.state.nes} />
+      </section>
     </>;
   },
 };
