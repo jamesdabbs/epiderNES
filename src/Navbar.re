@@ -6,6 +6,12 @@ let make =
       {ReasonReact.string(label)}
     </a>;
 
+  let rom_name =
+    switch (nes) {
+    | Some(n) => n.rom.pathname
+    | _ => "EpiderNES"
+    };
+
   let framerate =
     switch (fps) {
     | None => ReasonReact.null
@@ -16,18 +22,7 @@ let make =
     };
 
   <nav className="navbar" role="navigation" ariaLabel="main navigation">
-    <div className="navbar-brand">
-      <a className="navbar-item" href="/epiderNES">
-        <p>
-          {ReasonReact.string(
-             switch (nes) {
-             | Some(n) => n.rom.pathname
-             | _ => "EpiderNES"
-             },
-           )}
-        </p>
-      </a>
-    </div>
+    <div className="navbar-brand"> {link(rom_name, "/epiderNES")} </div>
     <div className="navbar-menu">
       <div className="navbar-start">
         {link("CPU", "/epiderNES/cpu")}
