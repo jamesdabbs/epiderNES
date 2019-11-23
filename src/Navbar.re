@@ -1,10 +1,14 @@
 [@react.component]
 let make =
     (~nes: option(Rawbones.Nes.t), ~onRomLoad, ~fps, ~running, ~dispatch) => {
-  let link = (label, path) =>
-    <a className="navbar-item" onClick={_ => ReasonReactRouter.push(path)}>
-      {ReasonReact.string(label)}
-    </a>;
+  let link = (label, ~action=() => (), path) => {
+    let onClick = _ => {
+      action();
+      ReasonReactRouter.push(path);
+    };
+
+    <a className="navbar-item" onClick> {ReasonReact.string(label)} </a>;
+  };
 
   let rom_name =
     switch (nes) {
@@ -26,7 +30,10 @@ let make =
     <div className="navbar-menu">
       <div className="navbar-start">
         {link("CPU", "/epiderNES/cpu")}
-        {link("PPU", "/epiderNES/ppu")}
+        {link("PPU", "/epiderNES/ppu", ~action=() => {
+           dispatch(Action.Stop);
+           ();
+         })}
         framerate
       </div>
       <div className="navbar-end">
