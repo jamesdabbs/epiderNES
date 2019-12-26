@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@glennsl/bs-json@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@glennsl/bs-json/-/bs-json-3.0.0.tgz#b4e1cf6612270a8dd7287a8a71ebe17e8f0fb683"
-  integrity sha512-slqtGLd/c3yQK9Qfd1gfMB9JCzNU4wzCpVPfO9pXlG64M+te5r30FK++tb3uQEVlVLYtpgZ4wCHtkI8xoshgxQ==
+"@glennsl/bs-json@^5.0.0":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@glennsl/bs-json/-/bs-json-5.0.1.tgz#b19d0b45f4a80d52e6bfefa032ac99f4548f3083"
+  integrity sha512-tDxqeO4LCUz3HIwsdqyM4OIUk/bIV8QwDuhNbqy3hHIVEciePbJXTSyXMKsoIFs3ukQY8ZsQXskONtOK4TyLfA==
 
 "@types/events@*":
   version "3.0.0"
@@ -536,10 +536,10 @@ bs-fetch@^0.4.0:
   resolved "https://registry.yarnpkg.com/bs-fetch/-/bs-fetch-0.4.0.tgz#355fd0e3c77d283f6735d43b9daa81aa6e75a365"
   integrity sha512-hoQ/5kxTeIMRJ2S9IrSx5uVzDcrebXv089E+MUJyOjT2P9ux3bJ7hrIPXBQZiErf6uyL1Q5WkdVv9cEw1Hkpuw==
 
-bs-platform@^5.0.4:
-  version "5.0.6"
-  resolved "https://registry.yarnpkg.com/bs-platform/-/bs-platform-5.0.6.tgz#88c13041fb020479800de3d82c680bf971091425"
-  integrity sha512-6Boa2VEcWJp2WJr38L7bp3J929nYha7gDarjxb070jWzgfPJ/WbzjipmSfnu2eqqk1MfjEIpBipbPz6n1NISwA==
+bs-platform@7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/bs-platform/-/bs-platform-7.0.0.tgz#6d1b0dd0d53f16f5b7fb2656ccae58c71ec988dc"
+  integrity sha512-3cPwrt/1hGjXuGS2HfVyd6oc6p/YpDOQIoLiFLRgrrB7/bnDNvbJn4XhO1PUyuRL4e7fc24R3xvA08BFDHZ6Gw==
 
 buffer-from@^1.0.0:
   version "1.1.1"
@@ -3245,12 +3245,12 @@ raw-body@2.4.0:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
-rawbones@0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/rawbones/-/rawbones-0.3.2.tgz#3e007d84d3b5e6ac6084155ffce164776a4bff91"
-  integrity sha512-6+X7twOsegft4bXZIh4+dTNOnOczdCsNPWt1cwf+NZQm+eoHYozJ0A6NeBFUT5i+6ty81GkG8ElfxKCa8ltuEg==
+rawbones@0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/rawbones/-/rawbones-0.3.4.tgz#9e683178bfa481f163b31246fc7d88dc01120fe2"
+  integrity sha512-6QQ4/biB2nJG+y7ogc75YxQCt3sUV6R/qtGP+IQ9HX7kh6vNETeSrkzZvTuObc5Q5kEmaAvemql5uAjed2e78g==
   dependencies:
-    "@glennsl/bs-json" "^3.0.0"
+    "@glennsl/bs-json" "^5.0.0"
 
 rc@^1.2.7:
   version "1.2.8"
