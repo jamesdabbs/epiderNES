@@ -18,13 +18,13 @@
   "license": "MIT",
   "dependencies": {
     "bs-fetch": "^0.4.0",
-    "rawbones": "0.3.4",
+    "rawbones": "0.3.5",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
     "reason-react": ">=0.7.0"
   },
   "devDependencies": {
-    "bs-platform": "7.0.0",
+    "bs-platform": "8.2",
     "copy-webpack-plugin": "^5.0.3",
     "html-webpack-plugin": "^3.2.0",
     "webpack": "^4.0.1",
