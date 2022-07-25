@@ -1,3 +1,0 @@
-#!/bin/sh
-  exec node "/home/cons/.esy/source/i/webpack_dev_server__3.11.3__234f47c2/bin/webpack-dev-server.js" "$@"
-              

@@ -1,4 +1,0 @@
-#!/bin/sh
-export ESY__NODE_BIN_PATH="/home/cons/projects/epiderNES/_esy/default/bin"
-exec "/home/cons/.asdf/installs/nodejs/16.13.0/bin/node" -r "/home/cons/projects/epiderNES/_esy/default/pnp.js" "$@"
-              
