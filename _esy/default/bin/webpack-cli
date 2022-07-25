@@ -1,0 +1,3 @@
+#!/bin/sh
+  exec node "/home/cons/.esy/source/i/webpack_cli__3.3.12__4fc89bd2/bin/cli.js" "$@"
+              

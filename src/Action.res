@@ -1,5 +1,5 @@
-type requestId = int;
-type character = char;
+type requestId = int
+type character = char
 
 type t =
   | Load(Rawbones.Nes.t)
@@ -11,4 +11,4 @@ type t =
   | KeyUp(character)
   | QueueFrame(requestId)
   | Stop
-  | Start;
+  | Start

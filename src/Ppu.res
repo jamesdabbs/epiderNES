@@ -1,8 +1,8 @@
-[@react.component]
+@react.component
 let make = (~nes: Rawbones.Nes.t) => {
-  let ppu = nes.ppu;
+  let ppu = nes.ppu
   let {
-    Rawbones.Ppu.control,
+    Rawbones.Ppu.control: control,
     mask,
     status,
     oam_address,
@@ -12,10 +12,9 @@ let make = (~nes: Rawbones.Nes.t) => {
     buffer,
     fine_x,
     write_latch,
-  } =
-    ppu.registers;
+  } = ppu.registers
 
-  let raw = {j|
+  let raw = j`
 registers
   control     $control
   mask        $mask
@@ -27,7 +26,7 @@ registers
   buffer      $buffer
   fine_x      $fine_x
   write_latch $write_latch
-|j};
+`
 
-  <pre> {ReasonReact.string(raw)} </pre>;
-};
+  <pre> {ReasonReact.string(raw)} </pre>
+}

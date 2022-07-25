@@ -3,30 +3,28 @@
 ## Run Project
 
 ```sh
-npm install
-npm start
-# in another tab
-npm run webpack
+yarn
+yarn start
 ```
 
-After you see the webpack compilation succeed (the `npm run webpack` step), open up `build/index.html` (**no server needed!**). Then modify whichever `.re` file in `src` and refresh the page to see the changes.
+After you see the webpack compilation succeed (the `yarn webpack` step), open up `build/index.html` (**no server needed!**). Then modify whichever `.res` file in `src` and refresh the page to see the changes.
 
 **For more elaborate ReasonReact examples**, please see https://github.com/reasonml-community/reason-react-example
 
 ## Run Project with Server
 
-To run with the webpack development server run `npm run server` and view in the browser at http://localhost:8000. Running in this environment provides hot reloading and support for routing; just edit and save the file and the browser will automatically refresh.
+To run with the webpack development server run `yarn server` and view in the browser at http://localhost:8000. Running in this environment provides hot reloading and support for routing; just edit and save the file and the browser will automatically refresh.
 
 Note that any hot reload on a route will fall back to the root (`/`), so `ReasonReact.Router.dangerouslyGetInitialUrl` will likely be needed alongside the `ReasonReact.Router.watchUrl` logic to handle routing correctly on hot reload refreshes or simply opening the app at a URL that is not the root.
 
-To use a port other than 8000 set the `PORT` environment variable (`PORT=8080 npm run server`).
+To use a port other than 8000 set the `PORT` environment variable (`PORT=8080 yarn server`).
 
 ## Build for Production
 
 ```sh
-npm run clean
-npm run build
-npm run webpack:production
+yarn clean
+yarn build
+yarn webpack:production
 ```
 
 This will replace the development artifact `build/Index.js` for an optimized version as well as copy `src/index.html` into `build/`. You can then deploy the contents of the `build` directory (`index.html` and `Index.js`).

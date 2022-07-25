@@ -1,13 +1,11 @@
 let nes_of_string = (filename, raw) =>
-  Bytes.of_string(raw) |> Rawbones.Rom.parse(filename) |> Rawbones.Nes.load;
+  Bytes.of_string(raw) |> Rawbones.Rom.parse(filename) |> Rawbones.Nes.load
 
-let uploadRom:
-  (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Nes.t => unit) => unit =
-  (fileRef, onLoad) => {
-    let doLoad:
-      (React.Ref.t(Js.Nullable.t(Dom.element)), (string, string) => unit) =>
-      unit = [%bs.raw
-      {|
+let uploadRom: (React.Ref.t<Js.Nullable.t<Dom.element>>, Rawbones.Nes.t => unit) => unit = (
+  fileRef,
+  onLoad,
+) => {
+  let doLoad: (React.Ref.t<Js.Nullable.t<Dom.element>>, (string, string) => unit) => unit = %raw(`
       function (fileRef, handler) {
         if (!fileRef.current) { return };
 
@@ -19,41 +17,27 @@ let uploadRom:
 
         reader.readAsBinaryString(fileRef.current.files[0]);
       }
-    |}
-    ];
+    `)
 
-    doLoad(fileRef, (filename, raw) =>
-      nes_of_string(filename, raw) |> onLoad
-    );
-  };
+  doLoad(fileRef, (filename, raw) => nes_of_string(filename, raw) |> onLoad)
+}
 
-let string_of_array_buffer: Fetch.arrayBuffer => string = [%bs.raw
-  {|
+let string_of_array_buffer: Fetch.arrayBuffer => string = %raw(`
   function (arrayBuffer) {
     const bytes = new Uint8Array(arrayBuffer);
     return String.fromCharCode.apply(null, bytes);
   }
-|}
-];
+`)
 
-let loadRom: (string, Rawbones.Nes.t => unit) => unit =
-  (path, onLoad) =>
-    ignore(
-      Js.Promise.(
-        Fetch.fetch("public/roms/" ++ path)
-        |> then_(Fetch.Response.arrayBuffer)
-        |> then_(buf =>
-             string_of_array_buffer(buf)
-             |> nes_of_string(path)
-             |> onLoad
-             |> resolve
-           )
-      ),
-    );
+let loadRom: (string, Rawbones.Nes.t => unit) => unit = (path, onLoad) =>
+  ignore({
+    open Js.Promise
+    Fetch.fetch("public/roms/" ++ path)
+    |> then_(Fetch.Response.arrayBuffer)
+    |> then_(buf => string_of_array_buffer(buf) |> nes_of_string(path) |> onLoad |> resolve)
+  })
 
-let displayFrame:
-  (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Render.frame) => unit = [%bs.raw
-  {|
+let displayFrame: (React.Ref.t<Js.Nullable.t<Dom.element>>, Rawbones.Render.frame) => unit = %raw(`
     function (ref, framebuffer) {
       const ctx = ref.current.getContext('2d', { alpha: false });
       const rgba_bytes = new Uint8ClampedArray(256 * 240 * 4);
@@ -68,12 +52,12 @@ let displayFrame:
       const image = new ImageData(rgba_bytes, 256, 240);
       ctx.putImageData(image, 0, 0);
     }
-  |}
-];
+  `)
 
-let displayFrameScaled:
-  (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Render.frame) => unit = [%bs.raw
-  {|
+let displayFrameScaled: (
+  React.Ref.t<Js.Nullable.t<Dom.element>>,
+  Rawbones.Render.frame,
+) => unit = %raw(`
     function (ref, framebuffer) {
       const ctx = ref.current.getContext('2d', { alpha: false });
       const rgba_bytes = new Uint8ClampedArray(512 * 480 * 4);
@@ -103,12 +87,9 @@ let displayFrameScaled:
       const image = new ImageData(rgba_bytes, 512, 480);
       ctx.putImageData(image, 0, 0);
     }
-  |}
-];
+  `)
 
-let drawTiles:
-  (React.Ref.t(Js.Nullable.t(Dom.element)), Rawbones.Pattern.Table.t) => unit = [%bs.raw
-  {|
+let drawTiles: (React.Ref.t<Js.Nullable.t<Dom.element>>, Rawbones.Pattern.Table.t) => unit = %raw(`
     function (ref, table) {
       const ctx = ref.current.getContext('2d');
 
@@ -142,35 +123,27 @@ let drawTiles:
         ctx.putImageData(img, x, y);
       }
     }
-  |}
-];
+  `)
 
-let parseHex: string => Js.Nullable.t(int) = [%bs.raw
-  {|
+let parseHex: string => Js.Nullable.t<int> = %raw(`
   function(str) {
     const parsed = parseInt(str, 16);
     return isNaN(parsed) ? null : parsed;
   }
-|}
-];
+`)
 
-let displayHex: int => string = [%bs.raw
-  {|
+let displayHex: int => string = %raw(`
   function(value) {
     const base = value.toString(16).toUpperCase();
     return base.length == 1 ? "0" + base : base;
   }
-|}
-];
+`)
 
-let setupDebugging: Rawbones.Nes.t => unit = [%bs.raw
-  {|
+let setupDebugging: Rawbones.Nes.t => unit = %raw(`
   function(nes) { window.nes = nes; }
-|}
-];
+`)
 
-[@bs.val]
-external requestAnimationFrame: (unit => unit) => int =
-  "requestAnimationFrame";
-[@bs.val] external cancelAnimationFrame: int => unit = "cancelAnimationFrame";
-[@bs.val] [@bs.scope "performance"] external now: unit => float = "now";
+@val
+external requestAnimationFrame: (unit => unit) => int = "requestAnimationFrame"
+@val external cancelAnimationFrame: int => unit = "cancelAnimationFrame"
+@val @scope("performance") external now: unit => float = "now"
